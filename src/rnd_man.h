@@ -2,9 +2,11 @@
 #define __RND_MAN_H__
 
 #include <cstdint>
+#include <memory>
 #include <vector>
+#include <stdexcept>
 
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 
 namespace rnd {
 
@@ -46,8 +48,10 @@ class RandManager {
 
  private:
   int buff_size_;
-  SHA512_CTX sha_ctx_;
-  uint8_t md_[SHA512_DIGEST_LENGTH];
+  //EVP_MD_CTX sha_ctx_;
+  //uint8_t md_[SHA512_DIGEST_LENGTH];
+  std::shared_ptr<EVP_MD_CTX> mdctx_;
+  std::vector<uint8_t> md_;
 };
 
 }  // namespace rnd
