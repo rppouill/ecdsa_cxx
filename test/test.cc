@@ -19,11 +19,22 @@ const char *STRING = "Hello world!";
  * @return Hash value.
  */
 std::vector<uint8_t> Hash(const std::string &str) {
-  SHA512_CTX ctx;
-  SHA512_Init(&ctx);
-  SHA512_Update(&ctx, str.c_str(), str.size());
-  std::vector<uint8_t> md(SHA512_DIGEST_LENGTH);
-  SHA512_Final(md.data(), &ctx);
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx)
+    throw std::runtime_error("EVP_MD_CTX_new failed");
+
+  std::vector<uint8_t> md(EVP_MD_size(EVP_sha512()));
+  unsigned int md_len = 0;
+
+  if (EVP_DigestInit_ex(ctx, EVP_sha512(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, str.data(), str.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, md.data(), &md_len) != 1) {
+    EVP_MD_CTX_free(ctx);
+    throw std::runtime_error("Hashing failed");
+  }
+
+  EVP_MD_CTX_free(ctx);
+  md.resize(md_len);
   return md;
 }
 
